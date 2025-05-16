@@ -158,6 +158,6 @@ var amberInit = amber()
 
 var amberApp = await amberInit.create(app); // we attach the amber instance to the express app we use for our custom logic.
 
-amberApp.auth.addUserIfNotExists('admin',"Admin Account","password", "*" /* This is the global admin */,["admin"]); // bootstrap an admin user. This is just for the demo. In a real application, you would use a proper secret from somewhere secured.
+amberApp.auth.addUserIfNotExists('admin',"Admin Account","password", "*" /* This is the global admin */,["admin","editor"]); // bootstrap an admin user. This is just for the demo. In a real application, you would use a proper secret from somewhere secured.
 
 amberApp.listen(port, "0.0.0.0");
