@@ -35,7 +35,7 @@ const amber= ref<AmberClient | null>(null);
             <v-divider></v-divider>
             <v-list-subheader>Global Admin</v-list-subheader>
             <v-list-item @click="amber?.getAmberUiApi().goToGlobalAdmin()">
-              <v-list-item-title>Manage Tenants</v-list-item-title>
+              <v-list-item-title>Manage Global</v-list-item-title>
             </v-list-item>
             <v-list-item @click="amber?.getAmberUiApi().goToGlobalMonitoring()">
               <v-list-item-title>Global Monitoring</v-list-item-title>

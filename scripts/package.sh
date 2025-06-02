@@ -10,11 +10,7 @@ if [[ "$1" == "rebuild" ]]; then
   if [ -d "backend/dist" ]; then
     echo "Deleting old dist folder..."
     rm -rf backend/dist
-  fi
-  echo "Building client..."
-  cd client
-  npm run --silent build &>/dev/null
-  cd ..
+  fi  
   echo "Building ui..."
   cd ui
   npm run --silent build &>/dev/null

@@ -21,20 +21,6 @@ const startTime =  new Date();
 const serverInstanceId = crypto.randomUUID();
 const version = "0.0.1"; // todo: we could use the value from package.json...
 
-// this setup of a server is separate from the amber instance. Amberbase wants to be just a library and not a framework. So it integrates into the app, and not the otherway around
-app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'static')));
-app.use(express.json());
-
-app.get('/starttime', (req, res) => {
-    res.send(`We are here since ${startTime.toISOString()}, that is ${relativeTimeFromDates(startTime)}`);
-})
-
-app.get('/version', (req, res) => {
-    res.send(`Version: ${version} (${buildInfo.commit} @ ${buildInfo.branch}) Build Time: ${buildInfo.buildtime}, Up Since: ${startTime.toISOString()}`);
-  });
-
-
  //This is just for the demo. Would be in some models.ts file
 interface ToDoEntity {
   title: string;
@@ -157,6 +143,20 @@ var amberInit = amber()
             });
 
 var amberApp = await amberInit.create(app); // we attach the amber instance to the express app we use for our custom logic.
+
+// this setup of a server is separate from the amber instance. Amberbase wants to be just a library and not a framework. So it integrates into the app, and not the otherway around
+// BUT, adding middleware before adding amber will mess with the amber routes, so we need to add the amber instance first, then the middleware
+app.use(cookieParser())
+app.use(express.static(path.join(__dirname, 'static')));
+app.use(express.json());
+app.get('/starttime', (req, res) => {
+    res.send(`We are here since ${startTime.toISOString()}, that is ${relativeTimeFromDates(startTime)}`);
+})
+
+app.get('/version', (req, res) => {
+    res.send(`Version: ${version} (${buildInfo.commit} @ ${buildInfo.branch}) Build Time: ${buildInfo.buildtime}, Up Since: ${startTime.toISOString()}`);
+  });
+
 
 amberApp.auth.addUserIfNotExists('admin',"Admin Account","password", "*" /* This is the global admin */,["admin","editor"]); // bootstrap an admin user. This is just for the demo. In a real application, you would use a proper secret from somewhere secured.
 
