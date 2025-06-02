@@ -61,7 +61,7 @@ const amber= ref<AmberClient | null>(null);
     </v-main>
     <v-footer app>
       <v-col class="text-center">
-        Visit amberbase at <v-btn variant="text" href="https://github.com/amberbase" target="_blank" prepend-icon="mdi-github">
+        Visit amberbase on <v-btn variant="text" href="https://github.com/amberbase" target="_blank" prepend-icon="mdi-github">
           github
           </v-btn>
       </v-col>
