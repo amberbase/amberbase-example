@@ -50,6 +50,12 @@ interface LoadtestCommand{
   deletionPercentage?: number;
 }
 
+interface TreeEntity {
+  label: string;
+  childrenIds: string[];
+  parentId: string | null;
+}
+
 var amberInit = amber()
               .withConfig({
                 db_password:db_password,
@@ -124,6 +130,42 @@ var amberInit = amber()
                 }
               }
             )
+            .withCollection<TreeEntity>("tree", { // a simple tree structure to test the tree functionality
+              accessRights:{
+                "editor":['create',"delete","read"],
+                "reader":['read']
+              },
+              onDocumentChange :async (tenant, userId, docId, oldDocument, newDocument, action, collections) =>{
+                var collection = collections.getCollection<TreeEntity>("tree")!;
+                if (action == 'delete')
+                { // we need to remove all children as well and need to remove it from the parents list
+                  if (oldDocument && oldDocument.childrenIds && oldDocument.childrenIds.length > 0) {
+                    for (const childId of oldDocument.childrenIds) {
+                      await collection.deleteDocument(tenant,userId, childId);
+                    }
+                  }
+                  if (oldDocument && oldDocument.parentId) {
+                    await collection.updateDocumentWithCallback(tenant, oldDocument.parentId,userId, (parentDoc) => {
+                      if (parentDoc && parentDoc.childrenIds) { 
+                        parentDoc.childrenIds = parentDoc.childrenIds.filter(id => id !== docId); // remove the deleted document from the parent's children list
+                        return parentDoc; // return the updated parent document
+                      }
+                    });
+                  }
+                }
+                if( action == 'create')
+                {
+                  if (newDocument && newDocument.parentId) { // if it has a parent, we need to add it to the parent's children list so that we can cascade delete later
+                    await collection.updateDocumentWithCallback(tenant, newDocument.parentId,userId, (parentDoc) => {
+                      if (parentDoc && parentDoc.childrenIds) { 
+                        parentDoc.childrenIds.push(docId); // add the new document to the parent's children list
+                        return parentDoc; // return the updated parent document
+                      }
+                    });
+                  }
+                }
+              }
+            })
             .withChannel<string>("selected-todo",{ // a simple "share selection id" channel to broadcast the selected item to all clients live at the same time
               subchannels:false
             })

@@ -5,6 +5,7 @@ import { state, type AmberUserDetails } from "@/state";
 import AmberToDoTest from "./AmberToDoTest.vue";
 import AmberNotesTest from "./AmberNotesTest.vue";
 import AmberLoadTest from "./AmberLoadTest.vue";
+import AmberTreeTest from "./AmberTreeTest.vue";
 
 const emit = defineEmits<{
    (e: 'userReady', details: {client: AmberClient,user:AmberUserDetails} | null): void,
@@ -14,7 +15,7 @@ const emit = defineEmits<{
 
 const amberUser = ref<AmberUserDetails | null>(null);
 const amber= ref<AmberClient | null>(null);
-const experiment = ref<"notes" | "todo" | "load">("todo");
+const experiment = ref<"notes" | "todo" | "load" | "tree">("todo");
 const connectedToAmber = ref(false);
 var isGlobalAdmin = false;
 var clientBuilder = amberClient().withPath("/amber");
@@ -67,6 +68,7 @@ amber.value = clientBuilder.withAmberUiLogin().start();
     >
       <v-tab value="todo">ToDo</v-tab>
       <v-tab value="notes">Notes</v-tab>
+      <v-tab value="tree">Tree</v-tab>
       <v-tab value="load" v-if ="amberUser.roles.includes('editor')">Loadtest</v-tab>
     </v-tabs>
     <v-tabs-window v-model="experiment">
@@ -84,6 +86,14 @@ amber.value = clientBuilder.withAmberUiLogin().start();
           Notes are owned by a user and can be shared with everyone (public) or specific users.
         </p>
         <AmberNotesTest v-if="amberUser && amber" :amber-client="amber"></AmberNotesTest>
+      </template>
+    </v-tabs-window-item>
+    <v-tabs-window-item value="tree">
+      <template v-if ="(amberUser.roles.includes('reader') || amberUser.roles.includes('editor'))">
+        <p class="explanation">
+          Example app that shows an editable tree that has a cascading delete.
+        </p>
+        <AmberTreeTest v-if="amberUser && amber" :amber-client="amber"></AmberTreeTest>
       </template>
     </v-tabs-window-item>
     <v-tabs-window-item value="load">
