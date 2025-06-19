@@ -56,6 +56,12 @@ interface TreeEntity {
   parentId: string | null;
 }
 
+interface TreeAnnotationEntity {
+  label: string;
+  treeEntityId: string; // the id of the tree entity this annotation belongs to
+  ownerId: string; // the owners userId of the annotation
+}
+
 var amberInit = amber()
               .withConfig({
                 db_password:db_password,
@@ -67,10 +73,10 @@ var amberInit = amber()
             .withCollection<ToDoEntity>("todos",
               {
                 accessRights:{
-                  "editor":['create',"update","delete","read"],
-                  "reader":['read']
+                  "editor":['create',"update","delete","subscribe"],
+                  "reader":['subscribe']
                 },
-                validator:(user, oldDoc:ToDoEntity, newDoc:ToDoEntity | null, action:CollectionAccessAction) => {
+                validator:(user, oldDoc, newDoc, action) => {
                   if (action == 'create' || action == 'update') 
                   {
                     if (newDoc.title.length < 3) return false; // title must be at least 3 characters long. This is an example validation
@@ -100,7 +106,7 @@ var amberInit = amber()
                       return true;
                     }
                   }
-                  if (action == 'read'){ // the filter to only see the subset of documents they are allowed to see is handled by the accessTags. 
+                  if (action == 'subscribe'){ // the filter to only see the subset of documents they are allowed to see is handled by the accessTags. 
                   // This is for general access to the collection subscription. The client would otherwise not even be able to subscribe
                     if(user.roles.includes("editor") || user.roles.includes("reader")){
                       return true;
@@ -129,16 +135,23 @@ var amberInit = amber()
                   return true;
                 }
               }
-            )
+            )            
             .withCollection<TreeEntity>("tree", { // a simple tree structure to test the tree functionality
               accessRights:{
-                "editor":['create',"delete","read"],
-                "reader":['read']
+                "editor":['create',"delete","subscribe", "update"],
+                "reader":['subscribe']
               },
               onDocumentChange :async (tenant, userId, docId, oldDocument, newDocument, action, collections) =>{
                 var collection = collections.getCollection<TreeEntity>("tree")!;
+                const treeAnnotationCollection = collections.getCollection<TreeAnnotationEntity>("tree-annotations");
                 if (action == 'delete')
-                { // we need to remove all children as well and need to remove it from the parents list
+                { 
+                  // we need to delete all annotations that are related to this tree node. We use the indexed data tags to find them.                
+                  await treeAnnotationCollection.allDocumentsByTags(tenant, ["tn-" + docId], async (annotationId, annotationData) => {
+                    await treeAnnotationCollection.deleteDocument(tenant, userId, annotationId);
+                  });
+                    
+                  // we need to remove all children as well and need to remove it from the parents list
                   if (oldDocument && oldDocument.childrenIds && oldDocument.childrenIds.length > 0) {
                     for (const childId of oldDocument.childrenIds) {
                       await collection.deleteDocument(tenant,userId, childId);
@@ -166,12 +179,38 @@ var amberInit = amber()
                 }
               }
             })
+            .withCollection<TreeAnnotationEntity>("tree-annotations", // a simple tree annotation structure to test the deletion on-change functionality
+              { 
+                accessRights : (user: UserContext, doc: TreeAnnotationEntity | null, action: CollectionAccessAction) => {
+                if(action == 'create') 
+                {
+                  return user.roles?.includes("editor");
+                }
+                if(action == 'subscribe') 
+                {
+                  return user.roles?.includes("reader") || user.roles?.includes("editor");
+                }
+                if(action == 'delete' || action == 'update') 
+                {
+                  return doc?.ownerId == user.userId; // only the owner can update or delete the annotation
+                }
+
+              },
+              accessTagsFromDocument:(doc: TreeAnnotationEntity) => [ // we use access tags, generated out of the docuemnt content to make them accessible to a subset of users. There needs to be at least one overlap of document tags and user tags
+                  "owner-" + doc.ownerId], // only the owner can see the annotation
+              accessTagsFromUser:(user: UserContext) => [ // user tags allow users to see documents with the same tags
+                  "owner-" + user.userId // a user can see their own annotations
+              ],
+              tagsFromDocument:(doc: TreeAnnotationEntity) => [ // tags are used to filter the documents in the client side
+                  "tn-" + doc.treeEntityId // we use the tree node entity id to filter the annotations for a specific tree node
+              ]
+              })              
             .withChannel<string>("selected-todo",{ // a simple "share selection id" channel to broadcast the selected item to all clients live at the same time
               subchannels:false
             })
             .withCollection<DocumentEntity>("loadtest",{ // a simple collection used for load tests
               accessRights:{
-                "editor":['create',"update","delete","read"]
+                "editor":['create',"update","delete","subscribe"]
               }
             })
             .withChannel<LoadtestCommand>("loadtest-command",{ // a channel to distribute load tests towards all clients live at the same time. Poor-mans horizontally scalable load testing framework ;-)
@@ -187,7 +226,7 @@ var amberInit = amber()
 var amberApp = await amberInit.create(app); // we attach the amber instance to the express app we use for our custom logic.
 
 // this setup of a server is separate from the amber instance. Amberbase wants to be just a library and not a framework. So it integrates into the app, and not the otherway around
-// BUT, adding middleware before adding amber will mess with the amber routes, so we need to add the amber instance first, then the middleware
+// BUT, adding middleware before adding amber will mess with the amber routes, so we need to add the amber instance first, than the middleware. This seems to be a limitation of express.
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.json());
@@ -195,11 +234,10 @@ app.get('/starttime', (req, res) => {
     res.send(`We are here since ${startTime.toISOString()}, that is ${relativeTimeFromDates(startTime)}`);
 })
 
-app.get('/version', (req, res) => {
+app.get('/version', async (req, res) => {
     res.send(`Version: ${version} (${buildInfo.commit} @ ${buildInfo.branch}) Build Time: ${buildInfo.buildtime}, Up Since: ${startTime.toISOString()}`);
   });
 
 
-amberApp.auth.addUserIfNotExists('admin',"Admin Account","password", "*" /* This is the global admin */,["admin","editor"]); // bootstrap an admin user. This is just for the demo. In a real application, you would use a proper secret from somewhere secured.
-
+amberApp.addAdminIfNotExists('admin',"Admin Account","password", ["admin","editor"]); // bootstrap an admin user. This is just for the demo. In a real application, you would use a proper secret from somewhere secured.
 amberApp.listen(port, "0.0.0.0");
