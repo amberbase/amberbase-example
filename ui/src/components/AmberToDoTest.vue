@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, onMounted} from "vue"
 import { AmberClient, type UserWithRoles, type Tenant, type UserDetails, type UserInfo, type CollectionDocument} from "amber-client"
+import { createDocWithDocumentIdHint } from "amber-client/dist/src/collections";
 
 interface ToDo {
   title: string;
@@ -105,9 +106,8 @@ var create = async () => {
       completed: false,
     } as ToDoEntity;
     
-    const createdDoc = await collectionApi.createDoc(
-      newTodo
-    );
+    var createdDoc = await createDocWithDocumentIdHint(collectionApi, newTodo, newTodo.title);
+    
     editMode.value = false;
     
     if (createdDoc) {
@@ -195,7 +195,7 @@ onMounted(async () => {
         <v-list>
             <v-list-item v-for="todo in todosSortedByTitle()" :key="todo.title" @click="selectToDo(todo, true)" :active="selectedTodo?.id === todo.id" active-color="amber">
               <v-list-item-content>
-                <v-list-item-title>{{ todo.title }}</v-list-item-title>
+                <v-list-item-title :title="todo.id">{{ todo.title }}</v-list-item-title>
                 <v-list-item-subtitle><v-icon :icon="todo.completed? 'mdi-check-circle-outline':'mdi-clock-outline'"></v-icon></v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
