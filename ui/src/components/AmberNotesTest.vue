@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, onMounted} from "vue"
-import { AmberClient, type UserWithRoles, type Tenant, type UserDetails, type UserInfo, type CollectionDocument} from "amber-client"
+import { AmberClient, type UserInfo } from "amber-client"
 
 interface Note {
   title: string;

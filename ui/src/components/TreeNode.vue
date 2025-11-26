@@ -1,6 +1,5 @@
 <script setup lang="ts" generic="T extends Node">
-import {ref, onMounted} from "vue"
-import { AmberClient, type UserWithRoles, type Tenant, type UserDetails, type UserInfo, type CollectionDocument} from "amber-client"
+import { ref } from "vue"
 
 export interface Node {
   label: string;
@@ -41,7 +40,18 @@ var expanded = ref(false);
     </div>
     
     <div style="border-left:15px solid transparent" v-if="expanded">
-        <TreeNode v-for="child in props.node.children" :key="child.id" :selected="props.selected" @edit="(id, oldvalue)=>emit('edit', id, oldvalue)"  @select="(id)=>emit('select', id)" :node="child as T" @add-note="(id)=>emit('add-note', id)" @add="(id)=>emit('add', id)" @delete="(id)=>emit('delete', id)" :editable="props.editable"></TreeNode>
+        <TreeNode
+          v-for="child in props.node.children"
+          :key="child.id"
+          :selected="props.selected"
+          @edit="(id, oldvalue)=>emit('edit', id, oldvalue)"
+          @select="(id)=>emit('select', id)"
+          :node="(child as T)"
+          @add-note="(id)=>emit('add-note', id)"
+          @add="(id)=>emit('add', id)"
+          @delete="(id)=>emit('delete', id)"
+          :editable="props.editable"
+        ></TreeNode>
     </div>
   </div>
 </template>

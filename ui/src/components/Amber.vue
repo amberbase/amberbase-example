@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref} from "vue"
-import {  AmberClient, AmberClientInit, type InvitationDetails, type UserDetails, amberClient} from "amber-client"
+import { AmberClient, amberClient} from "amber-client"
 import { state, type AmberUserDetails } from "@/state";
 import AmberToDoTest from "./AmberToDoTest.vue";
 import AmberNotesTest from "./AmberNotesTest.vue";

@@ -11,7 +11,6 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 import App from './App.vue'
 import { state } from './state'
-import { amber } from 'vuetify/util/colors'
 
 const vuetify = createVuetify({
     components,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, onMounted, computed} from "vue"
-import { AmberClient, type UserWithRoles, type Tenant, type UserDetails, type UserInfo, type CollectionDocument} from "amber-client"
+import { AmberClient, type UserDetails, type UserInfo } from "amber-client"
 import TreeNode, {type Node} from "./TreeNode.vue";
 
 interface TreeItem extends Node {

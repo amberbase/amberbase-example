@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {ref, onMounted} from "vue"
-import { AmberClient, type UserWithRoles, type Tenant, type UserDetails, type UserInfo, type CollectionDocument} from "amber-client"
-import { de } from "vuetify/locale";
+import { AmberClient } from "amber-client"
 
 interface Document {
   title: string;
@@ -36,7 +35,7 @@ var deletionsExecuted = ref(0);
 var documentUpdatesProcessed = ref(0);
 var intervalCounter = ref(0);
 var errors = ref<string[]>([]);
-var runningId = ref<number>(0);
+var runningId = ref<number|NodeJS.Timeout>(0);
 var latencyBuffer : number[] = [];
 var latencyBufferSize = 5;
 var avgLatency = ref<number>(0);
@@ -285,35 +284,37 @@ onMounted(async () => {
           <v-card-subtitle v-if="running()">Interval number {{ intervalCounter }}</v-card-subtitle>
           <v-card-text>
               <table>
-                <tr>
-                  <th>Creations</th>
-                  <td>{{ creationsExecuted }}</td>
-                </tr>
-                <tr>
-                  <th>Updates</th>
-                  <td>{{ updatesExecuted }}</td>
-                </tr>
-                <tr>
-                  <th>Deletions</th>
-                  <td>{{ deletionsExecuted }}</td>
-                </tr>
-                <tr>
-                  <th>Documents</th>
-                  <td>{{ docs.length }}</td>
-                </tr>
-                <tr>
-                  <th>Avg Latency</th>
-                  <td>{{ avgLatency }} ms</td>
-                </tr>
-                
-                <tr>
-                  <th>Processed Documents</th>
-                  <td>{{ documentUpdatesProcessed }}</td>
-                </tr>
-                <tr>
-                  <th>Errors</th>
-                  <td>{{ errors.length }}</td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <th>Creations</th>
+                    <td>{{ creationsExecuted }}</td>
+                  </tr>
+                  <tr>
+                    <th>Updates</th>
+                    <td>{{ updatesExecuted }}</td>
+                  </tr>
+                  <tr>
+                    <th>Deletions</th>
+                    <td>{{ deletionsExecuted }}</td>
+                  </tr>
+                  <tr>
+                    <th>Documents</th>
+                    <td>{{ docs.length }}</td>
+                  </tr>
+                  <tr>
+                    <th>Avg Latency</th>
+                    <td>{{ avgLatency }} ms</td>
+                  </tr>
+                  
+                  <tr>
+                    <th>Processed Documents</th>
+                    <td>{{ documentUpdatesProcessed }}</td>
+                  </tr>
+                  <tr>
+                    <th>Errors</th>
+                    <td>{{ errors.length }}</td>
+                  </tr>
+                </tbody>
               </table>
           </v-card-text>
         </v-card>
