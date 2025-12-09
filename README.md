@@ -1,2 +1,3 @@
 # amberbase-example
-Example repository to showcase the amberbase library
+
+Repository to showcase the Amberbase realtime database in real-life examples.
