@@ -79,7 +79,8 @@ var amberInit = amber()
                 validator:(user, oldDoc, newDoc, action) => {
                   if (action == 'create' || action == 'update') 
                   {
-                    if (newDoc.title.length < 3) return false; // title must be at least 3 characters long. This is an example validation
+                    if (newDoc.title.length < 3) return "Title must be at least 3 characters long"; // title must be at least 3 characters long. 
+                    // This is an example validation. We can return false or a string with the error message here.
                   }
                   return true;
                 }
@@ -128,9 +129,9 @@ var amberInit = amber()
                 validator:(user, oldDoc:NoteEntity, newDoc:NoteEntity | null, action:CollectionAccessAction) => {
                   if (action == 'create' || action == 'update') 
                   { // just some minimal validation. This is not a production ready validator.
-                    if (newDoc.title.length < 3) return false;
-                    if(!newDoc.owner) return false;
-                    if(!newDoc.sharedWith) return false;
+                    if (newDoc.title.length < 3) return "Title must be at least 3 characters long";
+                    if(!newDoc.owner) return "Owner must be set";
+                    if(!newDoc.sharedWith || !(newDoc.sharedWith instanceof Array)) return "sharedWith must be set as an array";
                   }
                   return true;
                 }
@@ -215,6 +216,9 @@ var amberInit = amber()
             })
             .withChannel<LoadtestCommand>("loadtest-command",{ // a channel to distribute load tests towards all clients live at the same time. Poor-mans horizontally scalable load testing framework ;-)
               subchannels:false
+            })
+            .withChannel<LoadtestCommand>("chat-room",{ // a channel for multiple chatrooms
+              subchannels:true
             })
             .withUi({
                availableRoles: ["editor", "reader"],
