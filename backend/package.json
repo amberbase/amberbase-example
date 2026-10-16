@@ -1,6 +1,9 @@
 {
   "name": "amberbase",
   "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
   "version": "1.0.0",
   "main": "dist/app.js",
   "scripts": {
@@ -12,17 +15,17 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "amber-client": "file:../../amberbase/src/client",
     "amber-backend": "file:../../amberbase/src/backend",
+    "amber-client": "file:../../amberbase/src/client",
     "cookie-parser": "^1.4.7",
-    "express": "^4.21.1",
-    "mariadb": "^3.3.2",
-    "ws": "^8.18.0"
+    "express": "^4.22.3",
+    "mariadb": "^3.5.4",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.8",
-    "@types/express": "^5.0.0",
-    "@types/ws": "^8.5.12",
-    "typescript": "^5.6.3"
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/ws": "^8.18.2",
+    "typescript": "^5.9.3"
   }
 }
