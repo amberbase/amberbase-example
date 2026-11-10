@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
       "module": "NodeNext",
+      "strict": false,
       "noImplicitAny": true,
       "removeComments": true,
       "preserveConstEnums": true,
       "sourceMap": true,
       "outDir": "dist",
+      "rootDir": "./src",
       "target": "ES2022",
       
     },

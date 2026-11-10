@@ -13,12 +13,12 @@ if [[ "$1" == "rebuild" ]]; then
   fi  
   echo "Building ui..."
   cd ui
-  npm run --silent build &>/dev/null
+  pnpm run --silent build &>/dev/null
   cd ..
 fi
 echo "Running backend build..."
 cd backend
-npm run --silent build
+pnpm run --silent build
 cd ..
 if [ -d "package" ]; then
   echo "Deleting an old package folder..."
@@ -31,8 +31,8 @@ echo "Copying build output..."
 cp -r backend/dist/* package/dist
 cp backend/package.json package
 cd package
-echo "Installing necessary npm modules..."
-npm install --omit=dev &>/dev/null
+echo "Installing production dependencies..."
+pnpm install --prod --ignore-workspace --config.node-linker=hoisted &>/dev/null # flat like npm, the linked amber packages rely on it
 cd ..
 
 if [ -f "app.zip" ]; then
