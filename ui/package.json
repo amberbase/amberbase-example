@@ -14,7 +14,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "amber-client": "file:../../amberbase/src/client",
+    "amber-client": "link:../../amberbase/src/client",
     "chart.js": "^4.5.1",
     "vue": "^3.5.44",
     "vue-chartjs": "^5.3.4",
