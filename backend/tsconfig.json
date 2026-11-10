@@ -6,6 +6,7 @@
       "preserveConstEnums": true,
       "sourceMap": true,
       "outDir": "dist",
+      "rootDir": "./src",
       "target": "ES2022",
       
     },
